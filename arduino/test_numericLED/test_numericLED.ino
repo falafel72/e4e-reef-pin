@@ -1,3 +1,4 @@
+
 #include <Wire.h>
 byte d[] = {0x7e, 0x30, 0x6d, 0x79, 0x33, 0x5b, 0x5f, 0x70, 0x7f, 0x7b };
 void setup()
@@ -12,31 +13,34 @@ void setup()
   Wire.endTransmission();
 }
 
-void set_digit(uint16_t value_one) 
+void set_digit(uint16_t value) 
 {
-  delay(100);
-  uint16_t value_ten = value_one/10;
-  uint16_t value_hun = value_ten/10;
-  uint16_t value_tho = value_hun/10;
+  delay(200);
+  uint16_t value_one = value%10;
+  uint16_t value_ten = (value/10) % 10;
+  uint16_t value_hun = (value/100) % 10;
+  uint16_t value_tho = (value/1000) % 10;
   Wire.beginTransmission(0x38);
   Wire.write(0x20);
-  Wire.write(d[1]);
+  Wire.write(d[value_one]);
   Wire.endTransmission();
   Wire.beginTransmission(0x38);
   Wire.write(0x21);
-  Wire.write(d[2]);
+  Wire.write(d[value_ten]);
   Wire.endTransmission();
   Wire.beginTransmission(0x38);
   Wire.write(0x22);
-  Wire.write(d[3]);
+  Wire.write(d[value_hun]);
   Wire.endTransmission();
   Wire.beginTransmission(0x38);
   Wire.write(0x23);
-  Wire.write(d[4]);
+  Wire.write(d[value_tho]);
   Wire.endTransmission();
 }
 
 void loop()
 {
-  set_digit(1234);
+  for(int i = 1000; i < 10000; i++){
+    set_digit(i);
+  }
 }

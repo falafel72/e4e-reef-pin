@@ -1,15 +1,15 @@
 import serial
 import time
-print("hello")
-ser = serial.Serial('COM8', 9600, timeout=5)
+ser = serial.Serial('COM3', 9600)
 ser.flushInput()
-while True:
+ser.write('H')
+print('hello')
+while ser.readable():
 	try:
-		ser.write('H')
 		ser_bytes = ser.readline()
 		print(ser_bytes)
-		if(ser_bytes == '9'):
-				break
+		if ser_bytes == '9\r\n':
+			break
 	except:
 		break
 ser.close()

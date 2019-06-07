@@ -34,7 +34,7 @@ int decimal_point;
 //  ADDRESS_HIGH = 0x76
 //  ADDRESS_LOW  = 0x77
 
-
+int state = 0;
 
 int set_number(int number);
 MS5803 sensor(ADDRESS_HIGH);
@@ -50,21 +50,21 @@ double base_altitude = 1655.0; // Altitude of SparkFun's HQ in Boulder, CO. in (
 
 SoftwareSerial BT (BLUETOOTH_RX, BLUETOOTH_TX);
 
-int state = 0;
 
 void charging() {
   // charging interrupt
   // should change state variable
+  state = BLUETOOTH_STATE; 
 }
 
-void not_charging() {
-  // switches when charging stops
-  // should change state variable
+void idle_state() {
+  state = LOW_POWER_STATE; 
 }
 
 void in_water() {
   // triggers when in water
   // should change state variable
+  state = LOGGING_STATE;
 }
 
 void i2c_send(uint8_t address, uint8_t instruction, uint8_t *data, int len) {
@@ -132,9 +132,11 @@ void setup() {
   
   pinMode(CHARGE_STAT_PIN, INPUT_PULLUP);
 
-  attachInterrupt(digitalPinToInterrupt(CHARGE_STAT_PIN), charging, FALLING);
   attachInterrupt(digitalPinToInterrupt(CHARGE_STAT_PIN), charging, RISING);
+  attachInterrupt(digitalPinToInterrupt(CHARGE_STAT_PIN), idle_state, FALLING);
   attachInterrupt(digitalPinToInterrupt(WET_DETECTOR_PIN), in_water, RISING);
+  attachInterrupt(digitalPinToInterrupt(WET_DETECTOR_PIN), idle_state, RISING);
+
   
   Serial.begin(9600);
   //Retrieve calibration constants for conversion math.
@@ -158,6 +160,11 @@ void loop() {
 
   while (state) {
     // either log data or send data here
+    if (state == LOGGING_STATE) {
+      // log data
+    } else if (state == BLUETOOTH_STATE) {
+      // transmit file over bluetooth
+    }
   }
 
   LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
